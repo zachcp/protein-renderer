@@ -27,7 +27,8 @@ where
             .expect("Van der waals not defined") as f32;
         let center = Vec3::new(x, y, z);
         let start_index = positions.len() as u32;
-        let color = color_func(atom);
+        let color = color_func(atom).to_srgba();
+        let color_array: [f32; 4] = [color.red, color.green, color.blue, color.alpha];
 
         // Generate sphere vertices
         for i in 0..=resolution {
@@ -40,7 +41,7 @@ where
                 let z = radius * theta.cos();
 
                 positions.push((center + Vec3::new(x, y, z)).to_array());
-                colors.push(color);
+                colors.push(color_array);
             }
         }
 

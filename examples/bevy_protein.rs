@@ -38,7 +38,7 @@ fn load_pdb(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     // Load the PDB file
-    let (mut pdb, _errors) = pdbtbx::open(
+    let (pdb, _errors) = pdbtbx::open(
             "examples/1fap.cif",
             StrictnessLevel::Medium
         ).unwrap();

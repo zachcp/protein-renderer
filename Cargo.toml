@@ -1,16 +1,13 @@
 [package]
-name = "protein-renderer"
+name = "protein_renderer"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
 bevy = "0.14.2"
 pdbtbx = "0.11.0"
+protein_renderer_structure = { path = "./crates/structure" }
+
 
 [workspace]
 members = ["crates/core", "crates/structure"]
-
-[features]
-default = ["standard_rendering"]
-standard_rendering = []
-advanced_rendering = ["standard_rendering"]

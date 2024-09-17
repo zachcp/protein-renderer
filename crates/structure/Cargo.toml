@@ -11,6 +11,7 @@ license = "MIT OR Apache-2.0"
 protein_renderer_core = { path = "../core" }
 
 # External dependencies
+bevy = "0.14.2"
 pdbtbx = "0.11"
 nalgebra = "0.33"
 itertools = "0.13"
