@@ -1,8 +1,11 @@
 //! A simple 3D scene with light shining over a cube sitting on a plane.
 use bevy::prelude::*;
-use pdbtbx::{self, StrictnessLevel};
-use protein_renderer_structure;
-use protein_renderer_structure::representations::pdb_to_mesh;
+use pdbtbx::{self, StrictnessLevel, PDB};
+// use protein_renderer_structure;
+// use protein_renderer_structure::representations::pdb_to_mesh;
+// use protein_renderer_core;
+// use protein_renderer_core::traits::renderable::{RenderOption, Renderable};
+use protein_renderer_core::{RenderOptions, Renderable};
 
 fn main() {
     App::new()
@@ -52,10 +55,6 @@ fn load_pdb(
     // Create a default material
     let material = materials.add(StandardMaterial {
         base_color: Color::WHITE,
-        // base_color: Color::srgba(1.0, 1.0, 1.0, 0.2),  // Fully
-        // alpha_mode: AlphaMode::Blend,
-        // unlit: true, // This makes the material ignore lighting
-        // base_color_texture: Some(meshes.add(Mesh::from(ColorMaterial::color(Color::WHITE)))),        ..default()
         ..default()
     });
 
@@ -63,21 +62,13 @@ fn load_pdb(
     for atom in pdb.atoms() {
         let (x, y, z) = atom.pos();
         let (x, y, z) = (x as f32, y as f32, z as f32);
-
-        // // Spawn a PbrBundle for each atom
-        // commands.spawn(PbrBundle {
-        //     mesh: sphere_mesh.clone(),
-        //     material.clone()
-        //     transform: Transform::from_xyz(x, y, z),
-        //     ..default()
-        // });
     }
 
-    let mesh = pdb_to_mesh(&pdb, color_func);
+    // let mesh = pdb_to_mesh(&pdb, color_func);
+    let mesh = pdb.generate_mesh(RenderOptions::Solid);
     let mesh_handle = meshes.add(mesh);
 
-    //
-    // // Spawn a PbrBundle for each atom
+    // Spawn a PbrBundle for each atom
     commands.spawn(PbrBundle {
         mesh: mesh_handle,
         material: material,
