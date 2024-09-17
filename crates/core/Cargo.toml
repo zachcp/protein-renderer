@@ -1,0 +1,20 @@
+[package]
+name = "protein_renderer_core"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "Core traits and utilities for the protein renderer project"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+# Common dependencies that might be useful across the project
+serde = { version = "1.0", features = ["derive"] }
+thiserror = "1.0"
+log = "0.4"
+
+[dev-dependencies]
+# Dependencies only used for tests
+assert_approx_eq = "1.1"
+
+[features]
+default = []
