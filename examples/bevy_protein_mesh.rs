@@ -1,8 +1,7 @@
 //! A simple 3D scene with light shining over a cube sitting on a plane.
 use bevy::prelude::*;
-use pdbtbx::{self, StrictnessLevel};
-use protein_renderer_structure;
-use protein_renderer_structure::representations::pdb_to_mesh;
+use pdbtbx::{self, StrictnessLevel, PDB};
+use protein_renderer_core::{ColorScheme, Structure};
 
 fn main() {
     App::new()
@@ -11,7 +10,11 @@ fn main() {
         .run();
 }
 
-fn setup(mut commands: Commands) {
+fn setup(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
     // Add a camera
     commands.spawn(Camera3dBundle {
         transform: Transform::from_xyz(0.0, 0.0, 100.0).looking_at(Vec3::ZERO, Vec3::Y),
@@ -21,13 +24,41 @@ fn setup(mut commands: Commands) {
     // Add a light
     commands.spawn(PointLightBundle {
         point_light: PointLight {
-            intensity: 1500.0,
+            intensity: 20000.0,
             shadows_enabled: true,
             ..default()
         },
         transform: Transform::from_xyz(4.0, 8.0, 4.0),
         ..default()
     });
+
+    // Spot light
+    commands.spawn(SpotLightBundle {
+        spot_light: SpotLight {
+            intensity: 1000.0,
+            color: Color::rgb(0.8, 1.0, 0.8),
+            shadows_enabled: true,
+            outer_angle: 10.0,
+            ..default()
+        },
+        transform: Transform::from_xyz(-4.0, 5.0, -4.0).looking_at(Vec3::ZERO, Vec3::Y),
+        ..default()
+    });
+
+    // let sphere_mesh = meshes.add(Mesh::from(shape::UVSphere::default()));
+
+    // // Shiny metallic sphere
+    // commands.spawn(PbrBundle {
+    //     mesh: sphere_mesh.clone(),
+    //     material: materials.add(StandardMaterial {
+    //         base_color: Color::rgb(0.8, 0.7, 0.6),
+    //         metallic: 1.0,
+    //         perceptual_roughness: 0.1,
+    //         ..default()
+    //     }),
+    //     transform: Transform::from_xyz(-1.5, 0.5, 0.0),
+    //     ..default()
+    // });
 }
 
 fn load_pdb(
@@ -37,47 +68,24 @@ fn load_pdb(
 ) {
     // Load the PDB file
     let (mut pdb, _errors) = pdbtbx::open("examples/1fap.cif", StrictnessLevel::Medium).unwrap();
+    let structure = Structure::builder()
+        .pdb(pdb)
+        .color_scheme(ColorScheme::ByAtomType)
+        .build();
 
-    let sphere_mesh = meshes.add(Sphere::default().mesh().uv(32, 18));
+    let mesh = structure.render();
+    let mesh_handle = meshes.add(mesh);
 
-    let color_func = |atom: &pdbtbx::Atom| {
-        match atom.element().expect("expect atom").symbol() {
-            "C" => Color::srgb(0.5, 0.5, 0.5), // Carbon: Gray
-            "N" => Color::srgb(0.0, 0.0, 1.0), // Nitrogen: Blue
-            "O" => Color::srgb(1.0, 0.0, 0.0), // Oxygen: Red
-            "S" => Color::srgb(1.0, 1.0, 0.0), // Sulfur: Yellow
-            _ => Color::srgb(1.0, 1.0, 1.0),   // Other: White
-        }
-    };
-    // Create a default material
+    // Note: why do I need multiple materials?
     let material = materials.add(StandardMaterial {
         base_color: Color::WHITE,
-        // base_color: Color::srgba(1.0, 1.0, 1.0, 0.2),  // Fully
-        // alpha_mode: AlphaMode::Blend,
-        // unlit: true, // This makes the material ignore lighting
-        // base_color_texture: Some(meshes.add(Mesh::from(ColorMaterial::color(Color::WHITE)))),        ..default()
+        metallic: 0.9,
+        perceptual_roughness: 0.2,
+        reflectance: 0.5,
         ..default()
     });
 
-    // Iterate through ATOM records and create spheres
-    for atom in pdb.atoms() {
-        let (x, y, z) = atom.pos();
-        let (x, y, z) = (x as f32, y as f32, z as f32);
-
-        // // Spawn a PbrBundle for each atom
-        // commands.spawn(PbrBundle {
-        //     mesh: sphere_mesh.clone(),
-        //     material.clone()
-        //     transform: Transform::from_xyz(x, y, z),
-        //     ..default()
-        // });
-    }
-
-    let mesh = pdb_to_mesh(&pdb, color_func);
-    let mesh_handle = meshes.add(mesh);
-
-    //
-    // // Spawn a PbrBundle for each atom
+    // Spawn a PbrBundle for each atom
     commands.spawn(PbrBundle {
         mesh: mesh_handle,
         material: material,
