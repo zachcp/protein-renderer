@@ -41,17 +41,18 @@ fn load_pdb(
     // Load the PDB file
     let (mut pdb, _errors) = pdbtbx::open("examples/1fap.cif", StrictnessLevel::Medium).unwrap();
 
-    let sphere_mesh = meshes.add(Sphere::default().mesh().uv(32, 18));
+    // let sphere_mesh = meshes.add(Sphere::default().mesh().uv(32, 18));
+    //
+    // let color_func = |atom: &pdbtbx::Atom| {
+    //     match atom.element().expect("expect atom").symbol() {
+    //         "C" => Color::srgb(0.5, 0.5, 0.5), // Carbon: Gray
+    //         "N" => Color::srgb(0.0, 0.0, 1.0), // Nitrogen: Blue
+    //         "O" => Color::srgb(1.0, 0.0, 0.0), // Oxygen: Red
+    //         "S" => Color::srgb(1.0, 1.0, 0.0), // Sulfur: Yellow
+    //         _ => Color::srgb(1.0, 1.0, 1.0),   // Other: White
+    //     }
+    // };
 
-    let color_func = |atom: &pdbtbx::Atom| {
-        match atom.element().expect("expect atom").symbol() {
-            "C" => Color::srgb(0.5, 0.5, 0.5), // Carbon: Gray
-            "N" => Color::srgb(0.0, 0.0, 1.0), // Nitrogen: Blue
-            "O" => Color::srgb(1.0, 0.0, 0.0), // Oxygen: Red
-            "S" => Color::srgb(1.0, 1.0, 0.0), // Sulfur: Yellow
-            _ => Color::srgb(1.0, 1.0, 1.0),   // Other: White
-        }
-    };
     // Create a default material
     let material = materials.add(StandardMaterial {
         base_color: Color::WHITE,
