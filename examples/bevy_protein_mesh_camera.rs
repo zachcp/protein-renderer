@@ -25,7 +25,11 @@ fn main() {
 #[derive(Component)]
 struct MainCamera;
 
-fn setup(mut commands: Commands) {
+fn setup(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
     // Add a camera
     commands.spawn((
         Camera3dBundle {
@@ -43,6 +47,19 @@ fn setup(mut commands: Commands) {
             ..default()
         },
         transform: Transform::from_xyz(4.0, 8.0, 4.0),
+        ..default()
+    });
+
+    // Spot light
+    commands.spawn(SpotLightBundle {
+        spot_light: SpotLight {
+            intensity: 10000.0,
+            color: Color::rgb(0.8, 1.0, 0.8),
+            shadows_enabled: true,
+            outer_angle: 0.6,
+            ..default()
+        },
+        transform: Transform::from_xyz(-4.0, 5.0, -4.0).looking_at(Vec3::ZERO, Vec3::Y),
         ..default()
     });
 }
@@ -63,12 +80,23 @@ fn update_protein_meshes(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     query: Query<(Entity, &Structure), (Changed<Structure>, With<Structure>)>,
+    // query: Query<(Entity, &Structure), With<Structure>>,
+    // changed_query: Query<Entity, Changed<Structure>>,
 ) {
+    println!("I'm in the update_protein_mesh function!");
+    println!("Total entities with Structure: {}", query.iter().count());
+    // println!(
+    //     "Entities with changed Structure: {}",
+    //     changed_query.iter().count()
+    // );
+
     for (entity, protein) in query.iter() {
+        println!("Working on {:}", entity);
         let mesh = protein.render();
         let mesh_handle = meshes.add(mesh);
         let material = materials.add(StandardMaterial {
             base_color: Color::WHITE,
+            perceptual_roughness: 0.9,
             ..default()
         });
 

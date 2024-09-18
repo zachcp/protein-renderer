@@ -76,13 +76,13 @@ impl Structure {
                 let mut positions = Vec::new();
                 let mut indices = Vec::new();
                 let mut colors = Vec::new();
+                let mut uvs = Vec::new();
                 let resolution = 10;
                 for atom in self.pdb.atoms() {
                     let (x, y, z) = atom.pos();
                     let (x, y, z) = (x as f32, y as f32, z as f32);
                     let center = Vec3::new(x, y, z);
                     let start_index = positions.len() as u32;
-                    // let color = color_func(atom).to_srgba();
                     let color = self.color_scheme.get_color(atom).to_srgba();
                     // the conversion below is needed for compatibility with Blender.
                     let color_array: [f32; 4] = [color.red, color.green, color.blue, color.alpha];
@@ -102,6 +102,10 @@ impl Structure {
                             let z = radius * theta.cos();
                             positions.push((center + Vec3::new(x, y, z)).to_array());
                             colors.push(color_array);
+                            // Calculate UV coordinates
+                            let u = j as f32 / resolution as f32;
+                            let v = i as f32 / resolution as f32;
+                            uvs.push([u, v]);
                         }
                     }
                     // Generate indices for triangles
@@ -129,6 +133,7 @@ impl Structure {
                 mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, positions);
                 mesh.insert_indices(bevy::render::mesh::Indices::U32(indices));
                 mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, colors);
+                mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
                 mesh.compute_smooth_normals();
                 mesh
             }

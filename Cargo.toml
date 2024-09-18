@@ -6,9 +6,8 @@ edition = "2021"
 [dependencies]
 bevy = "0.14.2"
 pdbtbx = "0.11.0"
-protein_renderer_structure = { path = "./crates/structure" }
 protein_renderer_core = { path = "./crates/core" }
 
 
 [workspace]
-members = ["crates/core", "crates/structure"]
+members = ["crates/core"]
