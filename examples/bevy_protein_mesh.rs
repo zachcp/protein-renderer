@@ -1,7 +1,7 @@
 //! A simple 3D scene with light shining over a cube sitting on a plane.
 use bevy::prelude::*;
 use pdbtbx::{self, StrictnessLevel, PDB};
-use protein_renderer_core::{ColorScheme, Structure};
+use protein_renderer::{ColorScheme, Structure};
 
 fn main() {
     App::new()

@@ -11,9 +11,6 @@ use bevy::render::render_resource::PrimitiveTopology;
 use bon::Builder;
 use pdbtbx::{Atom, Chain, Residue, PDB};
 
-/// Renderable
-///
-
 /// Enum representing various rendering options.
 pub enum RenderOptions {
     Wireframe,
