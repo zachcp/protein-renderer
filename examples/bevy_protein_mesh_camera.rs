@@ -39,6 +39,47 @@ fn setup(
         MainCamera,
     ));
 
+    // Key Light
+    commands.spawn(DirectionalLightBundle {
+        directional_light: DirectionalLight {
+            color: Color::rgb(1.0, 0.9, 0.9),
+            illuminance: 10000.0,
+            shadows_enabled: true,
+            ..default()
+        },
+        transform: Transform::from_rotation(Quat::from_euler(EulerRot::XYZ, -0.5, 0.5, 0.0)),
+        ..default()
+    });
+
+    // Fill Light
+    commands.spawn(DirectionalLightBundle {
+        directional_light: DirectionalLight {
+            color: Color::rgb(0.8, 0.8, 1.0),
+            illuminance: 5000.0,
+            shadows_enabled: false,
+            ..default()
+        },
+        transform: Transform::from_rotation(Quat::from_euler(EulerRot::XYZ, 0.5, -0.5, 0.0)),
+        ..default()
+    });
+
+    // Back Light
+    commands.spawn(DirectionalLightBundle {
+        directional_light: DirectionalLight {
+            color: Color::rgb(0.9, 0.9, 1.0),
+            illuminance: 3000.0,
+            shadows_enabled: false,
+            ..default()
+        },
+        transform: Transform::from_rotation(Quat::from_euler(
+            EulerRot::XYZ,
+            0.0,
+            std::f32::consts::PI,
+            0.0,
+        )),
+        ..default()
+    });
+
     // Add a light
     commands.spawn(PointLightBundle {
         point_light: PointLight {
