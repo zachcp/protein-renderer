@@ -7,8 +7,11 @@
 cargo run --example bevy_3d
 cargo run --example bevy_protein
 cargo run --example bevy_protein_mesh
+cargo run --example bevy_protein_mesh_camera
 
 ```
+
+![](docs/images/protein_01.png)
 
 
 ## Design
@@ -21,7 +24,8 @@ cargo run --example bevy_protein_mesh
 
 
 
-## MoviewSpec voerview:
+## MoviewSpec Overview:
+  - A structure (needs to be abel to be downloaded and parse)
   - Static selector: "all", "polymer", "protein", "nucleic", "branched", "ligand", "ion", "water"
   - Component expression:
   ```
@@ -42,4 +46,30 @@ cargo run --example bevy_protein_mesh
       atom_id?: int,            // Unique atom identifier (_atom_site.id)
       atom_index?: int,         // 0-based index of the atom in the source data
   }
+
   ```
+
+  - Union component expression: a combination of the above.
+  - Representation ( enum? ):
+    - ball and stick
+    - spheres
+    - other
+
+
+    ```
+    ─root {}
+     ├──download {url: "https://www.ebi.ac.uk/pdbe/entry-files/1cbs.bcif"}
+     │  └──parse {format: "bcif"}
+     │     └──structure {type: "model"}
+     │        ├──component {selector: "polymer"}
+     │        │  ├──representation {type: "cartoon"}
+     │        │  │  ├──color {color: "green"}
+     │        │  │  └──color {selector: {label_asym_id: "A", beg_label_seq_id: 1, end_label_seq_id: 50}, color: "#6688ff"}
+     │        │  └──label {text: "Protein"}
+     │        └──component {selector: "ligand"}
+     │           ├──representation {type: "ball_and_stick"}
+     │           │  └──color {color: "#cc3399"}
+     │           └──label {text: "Retinoic Acid"}
+     ├──canvas {background_color: "#ffffee"}
+     └──camera {target: [17,21,27], position: [41,34,69], up: [-0.129,0.966,-0.224]}
+    ```
