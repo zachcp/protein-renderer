@@ -1,11 +1,7 @@
 //! A simple 3D scene with light shining over a cube sitting on a plane.
 use bevy::prelude::*;
 use pdbtbx::{self, StrictnessLevel, PDB};
-// use protein_renderer_structure;
-// use protein_renderer_structure::representations::pdb_to_mesh;
-// use protein_renderer_core;
-// use protein_renderer_core::traits::renderable::{RenderOption, Renderable};
-use protein_renderer_core::{RenderOptions, Renderable};
+use protein_renderer_core::{ColorScheme, RenderOptions, Structure};
 
 fn main() {
     App::new()
@@ -40,34 +36,19 @@ fn load_pdb(
 ) {
     // Load the PDB file
     let (mut pdb, _errors) = pdbtbx::open("examples/1fap.cif", StrictnessLevel::Medium).unwrap();
+    let structure = Structure::builder()
+        .pdb(pdb)
+        .color_scheme(ColorScheme::ByAtomType)
+        .build();
 
-    // let sphere_mesh = meshes.add(Sphere::default().mesh().uv(32, 18));
-    //
-    // let color_func = |atom: &pdbtbx::Atom| {
-    //     match atom.element().expect("expect atom").symbol() {
-    //         "C" => Color::srgb(0.5, 0.5, 0.5), // Carbon: Gray
-    //         "N" => Color::srgb(0.0, 0.0, 1.0), // Nitrogen: Blue
-    //         "O" => Color::srgb(1.0, 0.0, 0.0), // Oxygen: Red
-    //         "S" => Color::srgb(1.0, 1.0, 0.0), // Sulfur: Yellow
-    //         _ => Color::srgb(1.0, 1.0, 1.0),   // Other: White
-    //     }
-    // };
+    let mesh = structure.render();
+    let mesh_handle = meshes.add(mesh);
 
-    // Create a default material
+    // Note: why do I need multiple materials?
     let material = materials.add(StandardMaterial {
         base_color: Color::WHITE,
         ..default()
     });
-
-    // Iterate through ATOM records and create spheres
-    for atom in pdb.atoms() {
-        let (x, y, z) = atom.pos();
-        let (x, y, z) = (x as f32, y as f32, z as f32);
-    }
-
-    // let mesh = pdb_to_mesh(&pdb, color_func);
-    let mesh = pdb.generate_mesh(RenderOptions::Solid);
-    let mesh_handle = meshes.add(mesh);
 
     // Spawn a PbrBundle for each atom
     commands.spawn(PbrBundle {
