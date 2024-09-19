@@ -105,36 +105,10 @@ impl Structure {
     }
 }
 
-// fn spawn_protein(
-//     mut commands: Commands,
-//     mut meshes: ResMut<Assets<Mesh>>,
-//     mut materials: ResMut<Assets<StandardMaterial>>,
-//     protein: &Structure,
-// ) {
-//     let mesh = protein.render();
-//     let mesh_handle = meshes.add(mesh);
-
-//     let material = materials.add(StandardMaterial {
-//         base_color: Color::srgb(0.8, 0.7, 0.6),
-//         metallic: 0.1,
-//         perceptual_roughness: 0.5,
-//         reflectance: 0.5,
-//         ..default()
-//     });
-
-//     commands.spawn(PbrBundle {
-//         mesh: mesh_handle,
-//         material,
-//         transform: Transform::from_xyz(0.0, 0.0, 0.0),
-//         ..default()
-//     });
-// }
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use pdbtbx::StrictnessLevel;
-
     #[test]
     fn test_pdb_to_mesh() {
         let (pdb, _errors) = pdbtbx::open("examples/1fap.cif", StrictnessLevel::Medium).unwrap();
