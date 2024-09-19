@@ -1,12 +1,8 @@
 //! Colors
 //!
 //! This moduel defines the color mapping used for rendering.
-use bevy::prelude::{
-    default, Assets, Color, ColorToComponents, Commands, Component, Mesh, MeshBuilder, Meshable,
-    PbrBundle, ResMut, Sphere, StandardMaterial, Transform, Vec3,
-};
-use bon::Builder;
-use pdbtbx::{Atom, Chain, Residue, PDB};
+use bevy::prelude::Color;
+use pdbtbx::Atom;
 
 pub enum ColorScheme {
     Solid(Color),

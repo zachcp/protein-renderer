@@ -1,7 +1,7 @@
 //! A simple 3D scene with light shining over a cube sitting on a plane.
 use bevy::prelude::*;
-use pdbtbx::{self, StrictnessLevel, PDB};
-use protein_renderer::{ColorScheme, RenderOptions, Structure};
+use pdbtbx::{self, StrictnessLevel};
+use protein_renderer::{ColorScheme, Structure};
 
 // adding this for integration with Bevy
 pub struct StructurePlugin;
@@ -42,7 +42,7 @@ fn setup(
     // Key Light
     commands.spawn(DirectionalLightBundle {
         directional_light: DirectionalLight {
-            color: Color::rgb(1.0, 0.9, 0.9),
+            color: Color::srgb(1.0, 0.9, 0.9),
             illuminance: 10000.0,
             shadows_enabled: true,
             ..default()
@@ -54,7 +54,7 @@ fn setup(
     // Fill Light
     commands.spawn(DirectionalLightBundle {
         directional_light: DirectionalLight {
-            color: Color::rgb(0.8, 0.8, 1.0),
+            color: Color::srgb(0.8, 0.8, 1.0),
             illuminance: 5000.0,
             shadows_enabled: false,
             ..default()
@@ -66,7 +66,7 @@ fn setup(
     // Back Light
     commands.spawn(DirectionalLightBundle {
         directional_light: DirectionalLight {
-            color: Color::rgb(0.9, 0.9, 1.0),
+            color: Color::srgb(0.9, 0.9, 1.0),
             illuminance: 3000.0,
             shadows_enabled: false,
             ..default()
@@ -95,7 +95,7 @@ fn setup(
     commands.spawn(SpotLightBundle {
         spot_light: SpotLight {
             intensity: 10000.0,
-            color: Color::rgb(0.8, 1.0, 0.8),
+            color: Color::srgb(0.8, 1.0, 0.8),
             shadows_enabled: true,
             outer_angle: 0.6,
             ..default()
