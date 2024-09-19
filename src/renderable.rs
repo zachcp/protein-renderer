@@ -3,11 +3,12 @@
 //! Trait and Implementations for Generating Representations.
 //!
 //!
-use bevy::prelude::*;
-use bevy::prelude::{Color, Vec3};
-use bevy::render::mesh::Mesh;
-use bevy::render::render_asset::RenderAssetUsages;
-use bevy::render::render_resource::PrimitiveTopology;
+
+// use bevy::prelude::*;
+use bevy::prelude::{
+    default, Assets, Color, ColorToComponents, Commands, Component, Mesh, MeshBuilder, Meshable,
+    PbrBundle, ResMut, Sphere, StandardMaterial, Transform, Vec3,
+};
 use bon::Builder;
 use pdbtbx::{Atom, Chain, Residue, PDB};
 
@@ -22,7 +23,6 @@ pub enum RenderOptions {
 
 pub enum ColorScheme {
     Solid(Color),
-    // Rainbow,
     ByAtomType,
     // ByChain(Box<dyn Fn(&Chain) -> Color>),
     // BySecondaryStructure(Box<dyn Fn(&Residue) -> Color>),
@@ -64,7 +64,6 @@ impl Structure {
     pub fn render(&self) -> Mesh {
         match &self.rendertype {
             RenderOptions::Wireframe => {
-                // TODO: Implement wireframe rendering
                 todo!()
             }
             RenderOptions::Solid => {
@@ -88,7 +87,7 @@ impl Structure {
                     meshes.push(sphere_mesh);
                 }
 
-                // combien all the meses together
+                // combine all the meshes together
                 meshes
                     .into_iter()
                     .reduce(|mut acc, mesh| {
@@ -98,16 +97,11 @@ impl Structure {
                     .unwrap()
             }
             RenderOptions::Textured(_) => {
-                // TODO: Implement textured rendering
                 todo!()
             }
             RenderOptions::LevelOfDetail(_) => {
-                // TODO: Implement level of detail rendering
                 todo!()
-            } // RenderOptions::Custom(_) => {
-              //     // return custom_fn();
-              //     todo!()
-              // }
+            }
         }
     }
 }
@@ -122,7 +116,7 @@ fn spawn_protein(
     let mesh_handle = meshes.add(mesh);
 
     let material = materials.add(StandardMaterial {
-        base_color: Color::rgb(0.8, 0.7, 0.6),
+        base_color: Color::srgb(0.8, 0.7, 0.6),
         metallic: 0.1,
         perceptual_roughness: 0.5,
         reflectance: 0.5,
@@ -140,42 +134,14 @@ fn spawn_protein(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use bevy::prelude::*;
     use pdbtbx::StrictnessLevel;
 
     #[test]
     fn test_pdb_to_mesh() {
         let (pdb, _errors) = pdbtbx::open("examples/1fap.cif", StrictnessLevel::Medium).unwrap();
-
-        let structure = Structure::builder.pdb(pdb).build();
-
-        // TODO: Assert that the mesh has the expected number of vertices and indices
-        assert_eq!(structure.pdb.atom_count(), 200);
-    }
-
-    #[test]
-    fn test_empty_pdb() {
-        // TODO: Create an empty PDB structure
-        // let empty_pdb = PDB::new();
-
-        // TODO: Call pdb_to_mesh function with empty PDB
-        // let mesh = pdb_to_mesh(&empty_pdb);
-
-        // TODO: Assert that the mesh is empty or has expected properties for an empty PDB
-        // assert_eq!(mesh.count_vertices(), 0);
-        // assert!(mesh.indices().is_none());
-    }
-
-    #[test]
-    fn test_large_pdb() {
-        // TODO: Load a large PDB file
-        // let large_pdb = PDB::from_file("path/to/large/pdb/file.pdb").unwrap();
-
-        // TODO: Call pdb_to_mesh function
-        // let mesh = pdb_to_mesh(&large_pdb);
-
-        // TODO: Assert that the mesh is created without errors and has expected properties
-        // assert!(mesh.count_vertices() > 0);
-        // assert!(mesh.indices().is_some());
+        let structure = Structure::builder().pdb(pdb).build();
+        assert_eq!(structure.pdb.atom_count(), 2154);
+        let mesh = structure.render();
+        assert_eq!(mesh.count_vertices(), 779748);
     }
 }
