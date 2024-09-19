@@ -18,6 +18,7 @@ use pdbtbx::PDB;
 ///
 /// Donw the Line: allow passing an arbitrary function that maps PDB to mesh.
 ///
+#[derive(Clone)]
 pub enum RenderOptions {
     Wireframe,
     Cartoon,
