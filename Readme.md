@@ -25,8 +25,6 @@ cargo run --example bevy_protein_mesh_camera
 - [molstar dev docs](https://molstar.org/docs/)
 - selection --> Loci
 - representation --> geometry + material
--
-
 
 
 ## MoviewSpec Overview:
@@ -51,8 +49,7 @@ cargo run --example bevy_protein_mesh_camera
       atom_id?: int,            // Unique atom identifier (_atom_site.id)
       atom_index?: int,         // 0-based index of the atom in the source data
   }
-
-  ```
+```
 
   - Union component expression: a combination of the above.
   - Representation ( enum? ):
