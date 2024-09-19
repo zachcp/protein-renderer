@@ -8,7 +8,6 @@ cargo run --example bevy_3d
 cargo run --example bevy_protein
 cargo run --example bevy_protein_mesh
 cargo run --example bevy_protein_mesh_camera
-
 ```
 
 ![](docs/images/protein_01.png)

@@ -3,14 +3,50 @@ use bevy::prelude::*;
 use pdbtbx::{self, StrictnessLevel};
 use protein_renderer::{ColorScheme, Structure, StructurePlugin};
 
+// fn main() {
+//     App::new()
+//         .add_plugins(DefaultPlugins)
+//         .add_plugins(StructurePlugin::new()) // <--- put any special magic here
+//         .add_systems(Startup, setup)
+//         .add_systems(Update, (update_protein_meshes, focus_camera_on_proteins))
+//         .run();
+// }
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugins(StructurePlugin) // <--- put any special magic here
-        .add_systems(Startup, setup)
-        .add_systems(Update, (update_protein_meshes, focus_camera_on_proteins))
+        .add_plugins(
+            StructurePlugin::new()
+                .with_file("examples/1fap.cif")
+                .with_files(vec!["examples/2abc.cif", "examples/3xyz.cif"]),
+        )
+        // .add_systems(Update, handle_load_protein_event)
         .run();
 }
+
+// fn handle_load_protein_event(
+//     mut commands: Commands,
+//     mut ev_load_protein: EventReader<LoadProteinEvent>,
+// ) {
+//     for ev in ev_load_protein.read() {
+//         load_protein(&mut commands, &ev.0);
+//     }
+// }
+//
+// fn handle_gui_upload(
+// GUI interaction resources and queries
+//     mut ev_load_protein: EventWriter<LoadProteinEvent>,
+// ) {
+//     // When a file is selected in the GUI
+//     if let Some(file_path) = selected_file_path {
+//         ev_load_protein.send(LoadProteinEvent(file_path));
+//     }
+// }
+
+// // Add this system to your App
+// .add_systems(Update, handle_gui_upload)
+//
+//
 
 #[derive(Component)]
 struct MainCamera;
