@@ -4,10 +4,11 @@
 ## Examples
 
 ```sh
-cargo run --example bevy_3d
-cargo run --example bevy_protein
-cargo run --example bevy_protein_mesh
-cargo run --example bevy_protein_mesh_camera
+cargo run --example bevy_protein_mesh_custom
+cargo build --release --target wasm32-unknown-unknown --example bevy_protein_mesh_custom_wasm
+wasm-bindgen --out-dir ./out/ --target web ./target/wasm32-unknown-unknown/release/examples/bevy_protein_mesh_custom_wasm.wasm
+
+
 ```
 
 ![](docs/images/protein_01.png)
