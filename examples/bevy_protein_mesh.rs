@@ -10,11 +10,7 @@ fn main() {
         .run();
 }
 
-fn setup(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) {
+fn setup(mut commands: Commands) {
     // Add a camera
     commands.spawn(Camera3dBundle {
         transform: Transform::from_xyz(0.0, 0.0, 100.0).looking_at(Vec3::ZERO, Vec3::Y),
@@ -58,7 +54,7 @@ fn load_pdb(
         .color_scheme(ColorScheme::ByAtomType)
         .build();
 
-    let mesh = structure.render();
+    let mesh = structure.to_mesh();
     let mesh_handle = meshes.add(mesh);
     let material = materials.add(StandardMaterial {
         base_color: Color::WHITE,

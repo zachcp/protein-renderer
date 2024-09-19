@@ -7,8 +7,7 @@
 // use bevy::prelude::*;
 use super::ColorScheme;
 use bevy::prelude::{
-    default, Assets, Color, ColorToComponents, Commands, Component, Mesh, MeshBuilder, Meshable,
-    PbrBundle, ResMut, Sphere, StandardMaterial, Transform, Vec3,
+    Color, ColorToComponents, Component, Mesh, MeshBuilder, Meshable, Sphere, Vec3,
 };
 use bon::Builder;
 use pdbtbx::PDB;
@@ -17,18 +16,16 @@ use pdbtbx::PDB;
 ///
 /// Each of these enums represents a rendering path that can be used by a `Structure`
 ///
+/// Donw the Line: allow passing an arbitrary function that maps PDB to mesh.
 ///
 pub enum RenderOptions {
     Wireframe,
     Cartoon,
     BallAndStick,
     Solid,
-    // Custom(Box<dyn Fn() -> bevy::prelude::Mesh>),
 }
 
 /// Define Everything Needed to render
-///
-///
 #[derive(Builder, Component)]
 pub struct Structure {
     pdb: PDB,
@@ -123,7 +120,7 @@ mod tests {
         let (pdb, _errors) = pdbtbx::open("examples/1fap.cif", StrictnessLevel::Medium).unwrap();
         let structure = Structure::builder().pdb(pdb).build();
         assert_eq!(structure.pdb.atom_count(), 2154);
-        let mesh = structure.render();
+        let mesh = structure.to_mesh();
         assert_eq!(mesh.count_vertices(), 779748);
     }
 }
