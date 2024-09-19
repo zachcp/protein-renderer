@@ -1,35 +1,47 @@
 //! A simple 3D scene with light shining over a cube sitting on a plane.
 use bevy::prelude::*;
-use pdbtbx::{self, StrictnessLevel, PDB};
-use protein_renderer::{ColorScheme, RenderOptions, Structure};
-
-// adding this for integration with Bevy
-pub struct StructurePlugin;
-
-// adding this for integration with Bevy
-impl Plugin for StructurePlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(Startup, load_proteins)
-            .add_systems(Update, (update_protein_meshes, focus_camera_on_proteins));
-    }
-}
+use protein_renderer::{Structure, StructurePlugin};
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugins(StructurePlugin)
-        .add_systems(Startup, setup)
+        .add_plugins(StructurePlugin::new().with_file("examples/1fap.cif")) //.with_files(vec!["examples/2abc.cif", "examples/3xyz.cif"]),
+        .add_systems(Startup, setup) // Add this back
+        // .add_systems(Update, handle_load_protein_event)
+        .add_systems(Update, (update_protein_meshes, focus_camera_on_proteins))
+        // Add this to your App setup
+        .add_systems(Update, check_structures)
         .run();
 }
+
+// fn handle_load_protein_event(
+//     mut commands: Commands,
+//     mut ev_load_protein: EventReader<LoadProteinEvent>,
+// ) {
+//     for ev in ev_load_protein.read() {
+//         load_protein(&mut commands, &ev.0);
+//     }
+// }
+//
+// fn handle_gui_upload(
+// GUI interaction resources and queries
+//     mut ev_load_protein: EventWriter<LoadProteinEvent>,
+// ) {
+//     // When a file is selected in the GUI
+//     if let Some(file_path) = selected_file_path {
+//         ev_load_protein.send(LoadProteinEvent(file_path));
+//     }
+// }
+
+// // Add this system to your App
+// .add_systems(Update, handle_gui_upload)
+//
+//
 
 #[derive(Component)]
 struct MainCamera;
 
-fn setup(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) {
+fn setup(mut commands: Commands) {
     // Add a camera
     commands.spawn((
         Camera3dBundle {
@@ -42,7 +54,7 @@ fn setup(
     // Key Light
     commands.spawn(DirectionalLightBundle {
         directional_light: DirectionalLight {
-            color: Color::rgb(1.0, 0.9, 0.9),
+            color: Color::srgb(1.0, 0.9, 0.9),
             illuminance: 10000.0,
             shadows_enabled: true,
             ..default()
@@ -54,7 +66,7 @@ fn setup(
     // Fill Light
     commands.spawn(DirectionalLightBundle {
         directional_light: DirectionalLight {
-            color: Color::rgb(0.8, 0.8, 1.0),
+            color: Color::srgb(0.8, 0.8, 1.0),
             illuminance: 5000.0,
             shadows_enabled: false,
             ..default()
@@ -66,7 +78,7 @@ fn setup(
     // Back Light
     commands.spawn(DirectionalLightBundle {
         directional_light: DirectionalLight {
-            color: Color::rgb(0.9, 0.9, 1.0),
+            color: Color::srgb(0.9, 0.9, 1.0),
             illuminance: 3000.0,
             shadows_enabled: false,
             ..default()
@@ -95,7 +107,7 @@ fn setup(
     commands.spawn(SpotLightBundle {
         spot_light: SpotLight {
             intensity: 10000.0,
-            color: Color::rgb(0.8, 1.0, 0.8),
+            color: Color::srgb(0.8, 1.0, 0.8),
             shadows_enabled: true,
             outer_angle: 0.6,
             ..default()
@@ -105,39 +117,26 @@ fn setup(
     });
 }
 
-fn load_proteins(mut commands: Commands) {
-    // Load your PDB files and create Protein components
-    let (pdb, _errors) = pdbtbx::open("examples/1fap.cif", StrictnessLevel::Medium).unwrap();
-    let structure = Structure::builder()
-        .pdb(pdb)
-        .color_scheme(ColorScheme::ByAtomType)
-        .build();
-
-    commands.spawn((structure, TransformBundle::default()));
+fn check_structures(query: Query<Entity, With<Structure>>) {
+    println!("Number of structures: {}", query.iter().count());
 }
 
 fn update_protein_meshes(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    query: Query<(Entity, &Structure), (Changed<Structure>, With<Structure>)>,
-    // query: Query<(Entity, &Structure), With<Structure>>,
-    // changed_query: Query<Entity, Changed<Structure>>,
+    query: Query<(Entity, &Structure), (With<Structure>, Without<Handle<Mesh>>)>,
 ) {
     println!("I'm in the update_protein_mesh function!");
     println!("Total entities with Structure: {}", query.iter().count());
-    // println!(
-    //     "Entities with changed Structure: {}",
-    //     changed_query.iter().count()
-    // );
-
     for (entity, protein) in query.iter() {
-        println!("Working on {:}", entity);
-        let mesh = protein.render();
+        println!("Working on {:?}", entity);
+        let mesh = protein.to_mesh();
         let mesh_handle = meshes.add(mesh);
         let material = materials.add(StandardMaterial {
-            base_color: Color::WHITE,
-            perceptual_roughness: 0.9,
+            base_color: Color::srgb(0.8, 0.7, 0.6),
+            metallic: 0.1,
+            perceptual_roughness: 0.5,
             ..default()
         });
 
@@ -150,7 +149,7 @@ fn update_protein_meshes(
 }
 
 fn focus_camera_on_proteins(
-    mut camera_query: Query<&mut Transform, (With<MainCamera>, Without<Structure>)>,
+    mut camera_query: Query<&mut Transform, (With<Camera>, Without<Structure>)>,
     protein_query: Query<&Transform, With<Structure>>,
 ) {
     if let Ok(mut camera_transform) = camera_query.get_single_mut() {

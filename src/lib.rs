@@ -1,2 +1,6 @@
-pub mod renderable;
-pub use renderable::{ColorScheme, RenderOptions, Structure};
+pub mod colors;
+pub mod plugin;
+pub mod structure;
+pub use colors::ColorScheme;
+pub use plugin::StructurePlugin;
+pub use structure::{RenderOptions, Structure};

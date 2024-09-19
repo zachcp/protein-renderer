@@ -1,6 +1,6 @@
 //! A simple 3D scene with light shining over a cube sitting on a plane.
 use bevy::prelude::*;
-use pdbtbx::{StrictnessLevel};
+use pdbtbx::StrictnessLevel;
 
 fn main() {
     App::new()
@@ -9,9 +9,7 @@ fn main() {
         .run();
 }
 
-fn setup(
-    mut commands: Commands,
-) {
+fn setup(mut commands: Commands) {
     // Add a camera
     commands.spawn(Camera3dBundle {
         transform: Transform::from_xyz(0.0, 0.0, 100.0).looking_at(Vec3::ZERO, Vec3::Y),
@@ -30,25 +28,17 @@ fn setup(
     });
 }
 
-
-
 fn load_pdb(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     // Load the PDB file
-    let (pdb, _errors) = pdbtbx::open(
-            "examples/1fap.cif",
-            StrictnessLevel::Medium
-        ).unwrap();
-
+    let (pdb, _errors) = pdbtbx::open("examples/1fap.cif", StrictnessLevel::Medium).unwrap();
 
     // Create a sphere mesh that will be instanced for each atom
 
-    let sphere_mesh = meshes.add(
-        Sphere::default().mesh().uv(32,18)
-    );
+    let sphere_mesh = meshes.add(Sphere::default().mesh().uv(32, 18));
 
     // Create a default material
     let material = materials.add(StandardMaterial {
