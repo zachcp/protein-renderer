@@ -1,0 +1,12 @@
+[package]
+name = "simpleweb"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bevy = "0.14.2"
+protein-renderer = { path = "../.." }
+wasm-bindgen = "0.2"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
