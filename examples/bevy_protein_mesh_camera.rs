@@ -1,24 +1,14 @@
 //! A simple 3D scene with light shining over a cube sitting on a plane.
 use bevy::prelude::*;
 use pdbtbx::{self, StrictnessLevel};
-use protein_renderer::{ColorScheme, Structure};
-
-// adding this for integration with Bevy
-pub struct StructurePlugin;
-
-// adding this for integration with Bevy
-impl Plugin for StructurePlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(Startup, load_proteins)
-            .add_systems(Update, (update_protein_meshes, focus_camera_on_proteins));
-    }
-}
+use protein_renderer::{ColorScheme, Structure, StructurePlugin};
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugins(StructurePlugin)
+        .add_plugins(StructurePlugin) // <--- put any special magic here
         .add_systems(Startup, setup)
+        .add_systems(Update, (update_protein_meshes, focus_camera_on_proteins))
         .run();
 }
 
@@ -105,35 +95,17 @@ fn setup(
     });
 }
 
-fn load_proteins(mut commands: Commands) {
-    // Load your PDB files and create Protein components
-    let (pdb, _errors) = pdbtbx::open("examples/1fap.cif", StrictnessLevel::Medium).unwrap();
-    let structure = Structure::builder()
-        .pdb(pdb)
-        .color_scheme(ColorScheme::ByAtomType)
-        .build();
-
-    commands.spawn((structure, TransformBundle::default()));
-}
-
 fn update_protein_meshes(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     query: Query<(Entity, &Structure), (Changed<Structure>, With<Structure>)>,
-    // query: Query<(Entity, &Structure), With<Structure>>,
-    // changed_query: Query<Entity, Changed<Structure>>,
 ) {
     println!("I'm in the update_protein_mesh function!");
     println!("Total entities with Structure: {}", query.iter().count());
-    // println!(
-    //     "Entities with changed Structure: {}",
-    //     changed_query.iter().count()
-    // );
-
     for (entity, protein) in query.iter() {
         println!("Working on {:}", entity);
-        let mesh = protein.render();
+        let mesh = protein.to_mesh();
         let mesh_handle = meshes.add(mesh);
         let material = materials.add(StandardMaterial {
             base_color: Color::WHITE,
