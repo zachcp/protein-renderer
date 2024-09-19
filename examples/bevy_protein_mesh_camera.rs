@@ -5,7 +5,7 @@ use protein_renderer::{Structure, StructurePlugin};
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugins(StructurePlugin::new().with_file("examples/1fap.cif")) //.with_files(vec!["examples/2abc.cif", "examples/3xyz.cif"]),
+        .add_plugins(StructurePlugin::new().with_file("examples/1fap.cif", None)) //.with_files(vec!["examples/2abc.cif", "examples/3xyz.cif"]),
         .add_systems(Startup, setup) // Add this back
         // .add_systems(Update, handle_load_protein_event)
         .add_systems(Update, (update_protein_meshes, focus_camera_on_proteins))
