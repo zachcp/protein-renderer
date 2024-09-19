@@ -36,7 +36,7 @@ fn setup(
     commands.spawn(SpotLightBundle {
         spot_light: SpotLight {
             intensity: 1000.0,
-            color: Color::rgb(0.8, 1.0, 0.8),
+            color: Color::srgb(0.8, 1.0, 0.8),
             shadows_enabled: true,
             outer_angle: 10.0,
             ..default()
