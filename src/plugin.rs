@@ -1,6 +1,6 @@
 //! Module for loading PDBs into Bevy via the Plugin system
 //!
-//! Over time this would be a good candidate for factring out
+//! Over time this would be a good candidate for factoring out
 use super::{ColorScheme, RenderOptions, Structure};
 use bevy::prelude::*;
 use pdbtbx::StrictnessLevel;
@@ -11,12 +11,14 @@ use std::path::PathBuf;
 pub struct StructureSettings {
     pub render_type: RenderOptions,
     pub color_scheme: ColorScheme,
+    pub material: StandardMaterial,
 }
 impl Default for StructureSettings {
     fn default() -> Self {
         Self {
             render_type: RenderOptions::Solid,
             color_scheme: ColorScheme::Solid(Color::WHITE),
+            material: StandardMaterial::default(),
         }
     }
 }
@@ -65,9 +67,10 @@ fn load_initial_proteins(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     for (file_path, settings) in &structure_files.0 {
+        // check valid filepath
         if !Path::new(file_path).exists() {
             eprintln!("Error: File not found: {:?}", file_path);
-            continue; // Skip to the next file
+            continue;
         }
 
         if let Ok((pdb, _errors)) = pdbtbx::open(
@@ -78,25 +81,11 @@ fn load_initial_proteins(
                 .pdb(pdb)
                 .rendertype(settings.render_type.clone())
                 .color_scheme(settings.color_scheme.clone())
+                .material(settings.material.clone())
                 .build();
-            let mesh = structure.to_mesh();
-            println!("Number of verices in the mesh: {}", mesh.count_vertices());
-            let mesh_handle = meshes.add(mesh);
-            let material = materials.add(StandardMaterial {
-                base_color: Color::srgb(0.8, 0.7, 0.6),
-                metallic: 0.1,
-                perceptual_roughness: 0.5,
-                ..default()
-            });
-
-            commands.spawn((
-                structure,
-                PbrBundle {
-                    mesh: mesh_handle,
-                    material,
-                    ..default()
-                },
-            ));
+            // bundle the mesh and the material together.
+            let pbr = structure.to_pbr(&mut meshes, &mut materials);
+            commands.spawn((structure, pbr));
         }
     }
 }
