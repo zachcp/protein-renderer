@@ -1,6 +1,6 @@
 //! Colors
 //!
-//! This moduel defines the color mapping used for rendering.
+//! This module defines the color mapping used for rendering.
 use bevy::prelude::Color;
 use pdbtbx::Atom;
 
@@ -20,7 +20,7 @@ pub enum ColorScheme {
 // ColorScheme::Custom(func) => func(atom, residue, chain),
 impl ColorScheme {
     pub fn get_color(&self, atom: &Atom) -> Color {
-        match self {
+        match &self {
             ColorScheme::Solid(color) => *color,
             ColorScheme::ByAtomType => {
                 match atom.element().expect("expect atom").symbol() {
@@ -32,5 +32,49 @@ impl ColorScheme {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use pdbtbx::Atom;
+
+    #[test]
+    fn test_get_color() {
+        let by_atom_scheme = ColorScheme::ByAtomType;
+        let create_atom =
+            |element: &str| Atom::new(true, 1, "", 0.0, 0.0, 0.0, 0.0, 0.0, element, 1).unwrap();
+
+        let carbon_atom = create_atom("C");
+        // println!("{:?}", carbon_atom);
+        let nitrogen_atom = create_atom("N");
+        let oxygen_atom = create_atom("O");
+        let sulfur_atom = create_atom("S");
+        let other_atom = create_atom("X");
+
+        // println!("{:?}", by_atom_scheme.get_color(&carbon_atom));
+
+        // Test ByAtomType color scheme
+        assert_eq!(
+            by_atom_scheme.get_color(&carbon_atom),
+            Color::srgb(0.5, 0.5, 0.5)
+        );
+        assert_eq!(
+            by_atom_scheme.get_color(&nitrogen_atom),
+            Color::srgb(0.0, 0.0, 1.0)
+        );
+        assert_eq!(
+            by_atom_scheme.get_color(&oxygen_atom),
+            Color::srgb(1.0, 0.0, 0.0)
+        );
+        assert_eq!(
+            by_atom_scheme.get_color(&sulfur_atom),
+            Color::srgb(1.0, 1.0, 0.0)
+        );
+        // assert_eq!(
+        //     by_atom_scheme.get_color(&other_atom),
+        //     Color::srgb(1.0, 1.0, 1.0)
+        // );
     }
 }
