@@ -1,42 +1,29 @@
-//! A simple 3D scene with light shining over a cube sitting on a plane.
+//!  Example allowing custom colors and rendering options
 use bevy::prelude::*;
-use protein_renderer::{Structure, StructurePlugin};
+use protein_renderer::{ColorScheme, RenderOptions, Structure, StructurePlugin, StructureSettings};
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugins(StructurePlugin::new().with_file("examples/1fap.cif", None)) //.with_files(vec!["examples/2abc.cif", "examples/3xyz.cif"]),
-        .add_systems(Startup, setup) // Add this back
-        // .add_systems(Update, handle_load_protein_event)
-        .add_systems(Update, (update_protein_meshes, focus_camera_on_proteins))
-        // Add this to your App setup
-        .add_systems(Update, check_structures)
+        .add_plugins(StructurePlugin::new().with_file(
+            "examples/1fap.cif",
+            Some(StructureSettings {
+                render_type: RenderOptions::Solid,
+                // color_scheme: ColorScheme::Solid(Color::WHITE),
+                color_scheme: ColorScheme::ByAtomType,
+            }),
+        ))
+        .add_systems(Startup, setup)
+        // .add_systems(
+        //     Update,
+        //     (
+        //         update_protein_meshes,
+        //         focus_camera_on_proteins,
+        //         check_structures,
+        //     ),
+        // )
         .run();
 }
-
-// fn handle_load_protein_event(
-//     mut commands: Commands,
-//     mut ev_load_protein: EventReader<LoadProteinEvent>,
-// ) {
-//     for ev in ev_load_protein.read() {
-//         load_protein(&mut commands, &ev.0);
-//     }
-// }
-//
-// fn handle_gui_upload(
-// GUI interaction resources and queries
-//     mut ev_load_protein: EventWriter<LoadProteinEvent>,
-// ) {
-//     // When a file is selected in the GUI
-//     if let Some(file_path) = selected_file_path {
-//         ev_load_protein.send(LoadProteinEvent(file_path));
-//     }
-// }
-
-// // Add this system to your App
-// .add_systems(Update, handle_gui_upload)
-//
-//
 
 #[derive(Component)]
 struct MainCamera;

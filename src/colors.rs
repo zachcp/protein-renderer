@@ -4,6 +4,7 @@
 use bevy::prelude::Color;
 use pdbtbx::Atom;
 
+#[derive(Clone)]
 pub enum ColorScheme {
     Solid(Color),
     ByAtomType,
