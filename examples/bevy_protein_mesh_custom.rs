@@ -5,23 +5,23 @@ use protein_renderer::{ColorScheme, RenderOptions, Structure, StructurePlugin, S
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugins(StructurePlugin::new().with_custom_file(
+        .add_plugins(StructurePlugin::new().with_file(
             "examples/1fap.cif",
-            StructureSettings {
+            Some(StructureSettings {
                 render_type: RenderOptions::Solid,
-                // color_scheme: ColorScheme::ByAtomType,
-                color_scheme: ColorScheme::Solid(Color::WHITE),
-            },
+                // color_scheme: ColorScheme::Solid(Color::WHITE),
+                color_scheme: ColorScheme::ByAtomType,
+            }),
         ))
         .add_systems(Startup, setup)
-        .add_systems(
-            Update,
-            (
-                update_protein_meshes,
-                focus_camera_on_proteins,
-                check_structures,
-            ),
-        )
+        // .add_systems(
+        //     Update,
+        //     (
+        //         update_protein_meshes,
+        //         focus_camera_on_proteins,
+        //         check_structures,
+        //     ),
+        // )
         .run();
 }
 

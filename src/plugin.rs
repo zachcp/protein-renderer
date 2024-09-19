@@ -4,6 +4,7 @@
 use super::{ColorScheme, RenderOptions, Structure};
 use bevy::prelude::*;
 use pdbtbx::StrictnessLevel;
+use std::path::Path;
 use std::path::PathBuf;
 
 #[derive(Clone)]
@@ -31,17 +32,13 @@ impl StructurePlugin {
             initial_files: Vec::new(),
         }
     }
-    pub fn with_file<P: Into<PathBuf>>(mut self, path: P) -> Self {
-        self.initial_files
-            .push((path.into(), StructureSettings::default()));
-        self
-    }
-    pub fn with_custom_file<P: Into<PathBuf>>(
+    pub fn with_file<P: Into<PathBuf>>(
         mut self,
         path: P,
-        settings: StructureSettings,
+        settings: Option<StructureSettings>,
     ) -> Self {
-        self.initial_files.push((path.into(), settings));
+        self.initial_files
+            .push((path.into(), settings.unwrap_or_default()));
         self
     }
 }
@@ -68,6 +65,11 @@ fn load_initial_proteins(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     for (file_path, settings) in &structure_files.0 {
+        if !Path::new(file_path).exists() {
+            eprintln!("Error: File not found: {:?}", file_path);
+            continue; // Skip to the next file
+        }
+
         if let Ok((pdb, _errors)) = pdbtbx::open(
             file_path.to_str().unwrap_or_default(),
             StrictnessLevel::Medium,
@@ -77,16 +79,13 @@ fn load_initial_proteins(
                 .rendertype(settings.render_type.clone())
                 .color_scheme(settings.color_scheme.clone())
                 .build();
-
             let mesh = structure.to_mesh();
+            println!("Number of verices in the mesh: {}", mesh.count_vertices());
             let mesh_handle = meshes.add(mesh);
-
             let material = materials.add(StandardMaterial {
-                // You might want to adjust this based on your ColorScheme
-                base_color: match &settings.color_scheme {
-                    ColorScheme::Solid(color) => *color,
-                    _ => Color::WHITE, // Default color, adjust as needed
-                },
+                base_color: Color::srgb(0.8, 0.7, 0.6),
+                metallic: 0.1,
+                perceptual_roughness: 0.5,
                 ..default()
             });
 
