@@ -4,6 +4,12 @@ use protein_renderer::{ColorScheme, RenderOptions, StructurePlugin, StructureSet
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
+pub fn load_cif_data(data: &[u8]) {
+    // Process the CIF data
+    // You might need to use a channel or event system to communicate with your Bevy app
+}
+
+#[wasm_bindgen]
 pub fn run() {
     let chalky = StandardMaterial {
         base_color: Color::srgb(0.9, 0.9, 0.9), // Light gray color

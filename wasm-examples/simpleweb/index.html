@@ -13,6 +13,21 @@
                 run();
             }
             start();
+
+            document
+                .getElementById("cifInput")
+                .addEventListener("change", function (e) {
+                    let file = e.target.files[0];
+                    let reader = new FileReader();
+                    reader.onload = function (e) {
+                        let arrayBuffer = e.target.result;
+                        // Assuming you've exposed a Rust function called `load_cif_data`
+                        wasm_bindgen.load_cif_data(new Uint8Array(arrayBuffer));
+                    };
+                    reader.readAsArrayBuffer(file);
+                });
         </script>
+
+        <input type="file" id="cifInput" accept=".cif" />
     </body>
 </html>
