@@ -80,25 +80,22 @@ fn load_initial_proteins(
                 .pdb(pdb)
                 .rendertype(settings.render_type.clone())
                 .color_scheme(settings.color_scheme.clone())
+                .material(settings.material.clone())
                 .build();
-            let mesh = structure.to_mesh();
-            println!("Number of verices in the mesh: {}", mesh.count_vertices());
-            let mesh_handle = meshes.add(mesh);
-            let material = materials.add(StandardMaterial {
-                base_color: Color::srgb(0.8, 0.7, 0.6),
-                metallic: 0.1,
-                perceptual_roughness: 0.5,
-                ..default()
-            });
 
-            commands.spawn((
-                structure,
-                PbrBundle {
-                    mesh: mesh_handle,
-                    material,
-                    ..default()
-                },
-            ));
+            // let mesh = structure.to_mesh();
+            // println!("Number of verices in the mesh: {}", mesh.count_vertices());
+            // let mesh_handle = meshes.add(mesh);
+            // let material = materials.add(StandardMaterial {
+            //     base_color: Color::srgb(0.8, 0.7, 0.6),
+            //     metallic: 0.1,
+            //     perceptual_roughness: 0.5,
+            //     ..default()
+            // });
+
+            let pbr = structure.to_pbr(&mut meshes, &mut materials);
+
+            commands.spawn((structure, pbr));
         }
     }
 }

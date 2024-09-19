@@ -3,15 +3,42 @@ use bevy::prelude::*;
 use protein_renderer::{ColorScheme, RenderOptions, Structure, StructurePlugin, StructureSettings};
 
 fn main() {
+    let chalky = StandardMaterial {
+        base_color: Color::rgb(0.9, 0.9, 0.9), // Light gray color
+        perceptual_roughness: 1.0,             // Maximum roughness for a matte look
+        metallic: 0.0,                         // No metallic properties
+        reflectance: 0.1,                      // Low reflectance
+        specular_transmission: 0.0,            // No specular transmission
+        thickness: 0.0,                        // No thickness (for transparency)
+        ior: 1.5,                              // Index of refraction (standard for most materials)
+        alpha_mode: AlphaMode::Opaque,         // Fully opaque
+        cull_mode: None,                       // Don't cull any faces
+        ..default()                            // Use defaults for other properties
+    };
+
+    let metallic = StandardMaterial {
+        base_color: Color::rgb(0.8, 0.8, 0.9), // Slight blue tint for a steel-like appearance
+        metallic: 1.0,                         // Fully metallic
+        perceptual_roughness: 0.1,             // Very smooth surface
+        reflectance: 0.5,                      // Medium reflectance
+        //emissive: Color::BLACK,                // No emission
+        alpha_mode: AlphaMode::Opaque, // Fully opaque
+        ior: 2.5,                      // Higher index of refraction for metals
+        specular_transmission: 0.0,    // No light transmission
+        thickness: 0.0,                // No thickness (for transparency)
+        //cull_mode: Some(Face::Back),   // Cull back faces for better performance
+        ..default() // Use defaults for other properties
+    };
+
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugins(StructurePlugin::new().with_file(
             "examples/1fap.cif",
             Some(StructureSettings {
                 render_type: RenderOptions::Solid,
-                // color_scheme: ColorScheme::Solid(Color::WHITE),
                 color_scheme: ColorScheme::ByAtomType,
-                material: StandardMaterial::default(),
+                // material: StandardMaterial::default(),
+                material: metallic,
             }),
         ))
         .add_systems(Startup, setup)
