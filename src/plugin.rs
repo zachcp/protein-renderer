@@ -1,6 +1,6 @@
 //! Module for loading PDBs into Bevy via the Plugin system
 //!
-//! Over time this would be a good candidate for factring out
+//! Over time this would be a good candidate for factoring out
 use super::{ColorScheme, RenderOptions, Structure};
 use bevy::prelude::*;
 use pdbtbx::StrictnessLevel;
@@ -67,9 +67,10 @@ fn load_initial_proteins(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     for (file_path, settings) in &structure_files.0 {
+        // check valid filepath
         if !Path::new(file_path).exists() {
             eprintln!("Error: File not found: {:?}", file_path);
-            continue; // Skip to the next file
+            continue;
         }
 
         if let Ok((pdb, _errors)) = pdbtbx::open(
@@ -82,19 +83,8 @@ fn load_initial_proteins(
                 .color_scheme(settings.color_scheme.clone())
                 .material(settings.material.clone())
                 .build();
-
-            // let mesh = structure.to_mesh();
-            // println!("Number of verices in the mesh: {}", mesh.count_vertices());
-            // let mesh_handle = meshes.add(mesh);
-            // let material = materials.add(StandardMaterial {
-            //     base_color: Color::srgb(0.8, 0.7, 0.6),
-            //     metallic: 0.1,
-            //     perceptual_roughness: 0.5,
-            //     ..default()
-            // });
-
+            // bundle the mesh and the material together.
             let pbr = structure.to_pbr(&mut meshes, &mut materials);
-
             commands.spawn((structure, pbr));
         }
     }
