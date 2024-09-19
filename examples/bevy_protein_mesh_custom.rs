@@ -38,7 +38,7 @@ fn main() {
                 render_type: RenderOptions::Solid,
                 color_scheme: ColorScheme::ByAtomType,
                 // material: StandardMaterial::default(),
-                material: metallic,
+                material: chalky,
             }),
         ))
         .add_systems(Startup, setup)
