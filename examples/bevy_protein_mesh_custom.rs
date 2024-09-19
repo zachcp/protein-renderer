@@ -16,7 +16,7 @@ fn main() {
         ..default()                             // Use defaults for other properties
     };
 
-    let metallic = StandardMaterial {
+    let _metallic = StandardMaterial {
         base_color: Color::srgb(0.8, 0.8, 0.9), // Slight blue tint for a steel-like appearance
         metallic: 1.0,                          // Fully metallic
         perceptual_roughness: 0.1,              // Very smooth surface
