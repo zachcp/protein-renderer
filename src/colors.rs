@@ -13,6 +13,10 @@ pub enum ColorScheme {
     // Custom(Box<dyn Fn(&Atom, &Residue, &Chain) -> Color>),
 }
 
+// ColorScheme::ByChain(func) => func(chain),
+// ColorScheme::BySecondaryStructure(func) => func(residue),
+// ColorScheme::ByResidueType(func) => func(residue),
+// ColorScheme::Custom(func) => func(atom, residue, chain),
 impl ColorScheme {
     pub fn get_color(&self, atom: &Atom) -> Color {
         match self {
@@ -25,10 +29,7 @@ impl ColorScheme {
                     "S" => Color::srgb(1.0, 1.0, 0.0), // Sulfur: Yellow
                     _ => Color::srgb(1.0, 1.0, 1.0),   // Other: White
                 }
-            } // ColorScheme::ByChain(func) => func(chain),
-              // ColorScheme::BySecondaryStructure(func) => func(residue),
-              // ColorScheme::ByResidueType(func) => func(residue),
-              // ColorScheme::Custom(func) => func(atom, residue, chain),
+            }
         }
     }
 }
