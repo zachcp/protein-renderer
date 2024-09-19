@@ -11,6 +11,7 @@ fn main() {
                 render_type: RenderOptions::Solid,
                 // color_scheme: ColorScheme::Solid(Color::WHITE),
                 color_scheme: ColorScheme::ByAtomType,
+                material: StandardMaterial::default(),
             }),
         ))
         .add_systems(Startup, setup)

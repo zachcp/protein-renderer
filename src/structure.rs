@@ -6,8 +6,10 @@
 
 // use bevy::prelude::*;
 use super::ColorScheme;
+use bevy::asset::Assets;
 use bevy::prelude::{
-    Color, ColorToComponents, Component, Mesh, MeshBuilder, Meshable, Sphere, Vec3,
+    default, Color, ColorToComponents, Component, Mesh, MeshBuilder, Meshable, PbrBundle, Sphere,
+    StandardMaterial, Vec3,
 };
 use bon::Builder;
 use pdbtbx::PDB;
@@ -34,6 +36,8 @@ pub struct Structure {
     rendertype: RenderOptions,
     #[builder(default = ColorScheme::Solid(Color::WHITE))]
     color_scheme: ColorScheme,
+    #[builder(default = StandardMaterial::default())]
+    material: StandardMaterial,
 }
 
 impl Structure {
@@ -43,6 +47,21 @@ impl Structure {
             RenderOptions::Cartoon => self.render_cartoon(),
             RenderOptions::BallAndStick => self.render_ballandstick(),
             RenderOptions::Solid => self.render_spheres(),
+        }
+    }
+    // this is the onw we probably want
+    pub fn to_pbr(
+        &self,
+        meshes: &mut Assets<Mesh>,
+        materials: &mut Assets<StandardMaterial>,
+    ) -> PbrBundle {
+        let mesh = self.to_mesh();
+        let material = self.material.clone();
+        PbrBundle {
+            mesh: meshes.add(mesh),
+            material: materials.add(material),
+            // transform: Transform::from_xyz(x, y, z),
+            ..default()
         }
     }
     fn render_wireframe(&self) -> Mesh {

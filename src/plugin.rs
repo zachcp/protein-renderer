@@ -11,12 +11,14 @@ use std::path::PathBuf;
 pub struct StructureSettings {
     pub render_type: RenderOptions,
     pub color_scheme: ColorScheme,
+    pub material: StandardMaterial,
 }
 impl Default for StructureSettings {
     fn default() -> Self {
         Self {
             render_type: RenderOptions::Solid,
             color_scheme: ColorScheme::Solid(Color::WHITE),
+            material: StandardMaterial::default(),
         }
     }
 }
