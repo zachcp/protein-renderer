@@ -14,15 +14,21 @@ use bon::Builder;
 use pdbtbx::PDB;
 
 /// Enum representing various rendering options.
+///
+/// Each of these enums represents a rendering path that can be used by a `Structure`
+///
+///
 pub enum RenderOptions {
     Wireframe,
+    Cartoon,
+    BallAndStick,
     Solid,
-    Textured(String),
-    LevelOfDetail(u32),
     // Custom(Box<dyn Fn() -> bevy::prelude::Mesh>),
 }
 
-// Core Structure for Rendering.
+/// Define Everything Needed to render
+///
+///
 #[derive(Builder, Component)]
 pub struct Structure {
     pdb: PDB,
@@ -33,21 +39,24 @@ pub struct Structure {
 }
 
 impl Structure {
-    pub fn render(&self) -> Mesh {
+    pub fn to_mesh(&self) -> Mesh {
         match &self.rendertype {
-            RenderOptions::Wireframe => {
-                todo!()
-            }
+            RenderOptions::Wireframe => self.render_wireframe(),
+            RenderOptions::Cartoon => self.render_cartoon(),
+            RenderOptions::BallAndStick => self.render_ballandstick(),
             RenderOptions::Solid => self.render_spheres(),
-
-            RenderOptions::Textured(_) => {
-                todo!()
-            }
-            RenderOptions::LevelOfDetail(_) => {
-                todo!()
-            }
         }
     }
+    fn render_wireframe(&self) -> Mesh {
+        todo!()
+    }
+    fn render_cartoon(&self) -> Mesh {
+        todo!()
+    }
+    fn render_ballandstick(&self) -> Mesh {
+        todo!()
+    }
+    /// Internal fn for rendering spheres.
     fn render_spheres(&self) -> Mesh {
         let mut meshes = Vec::new();
         for atom in self.pdb.atoms() {
