@@ -7,26 +7,29 @@
     </head>
     <body>
         <script type="module">
-            import init, { run } from "./out/simpleweb.js";
+            import init, { run, upload_protein_file } from "./out/simpleweb.js";
             async function start() {
                 await init();
                 run();
+                document
+                    .getElementById("pdbInput")
+                    .addEventListener("change", handleFileUpload);
             }
-            start();
-
-            document
-                .getElementById("cifInput")
-                .addEventListener("change", function (e) {
-                    let file = e.target.files[0];
-                    let reader = new FileReader();
+            function handleFileUpload(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
                     reader.onload = function (e) {
-                        let arrayBuffer = e.target.result;
-                        upload_protein_file(new Uint8Array(arrayBuffer));
+                        const contents = new Uint8Array(e.target.result);
+                        upload_protein_file(contents);
                     };
                     reader.readAsArrayBuffer(file);
-                });
+                }
+            }
+
+            start();
         </script>
 
-        <input type="file" id="cifInput" accept=".cif" />
+        <input type="file" id="pdbInput" accept=".pdb,.cif" />
     </body>
 </html>

@@ -8,6 +8,9 @@ bevy = "0.14.2"
 pdbtbx = "0.11"
 protein-renderer = { path = "../.." }
 wasm-bindgen = "0.2"
+futures-io = "0.3"
+futures-util = "0.3"
+
 
 [lib]
 crate-type = ["cdylib", "rlib"]

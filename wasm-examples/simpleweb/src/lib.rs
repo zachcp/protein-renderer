@@ -1,27 +1,35 @@
-//!  Example allowing custom colors and rendering options
-use bevy::asset::AssetPlugin;
 use bevy::prelude::*;
 use pdbtbx::{self, StrictnessLevel};
-use protein_renderer::{ColorScheme, RenderOptions, StructurePlugin, StructureSettings};
+use protein_renderer::{Structure, StructurePlugin};
+use std::io::BufReader;
+use std::io::Cursor;
 use wasm_bindgen::prelude::*;
+
+// Event to trigger protein loading
+#[derive(Event)]
+pub struct LoadProteinEvent(pub Vec<u8>);
 
 #[wasm_bindgen]
 pub fn upload_protein_file(file_data: &[u8]) {
-    // Get the Bevy app instance
-    let app = bevy::app::App::get_or_insert_resource::<bevy::app::AppInstance>();
-    // Send the UploadedFileEvent
-    app.world.send_event(UploadedFileEvent(file_data.to_vec()));
+    // Get the Bevy app instance and send the event
+    let world = &mut World::default();
+    world.send_event(LoadProteinEvent(file_data.to_vec()));
 }
 
 fn handle_protein_upload(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    mut upload_events: EventReader<UploadedFileEvent>,
+    mut upload_events: EventReader<LoadProteinEvent>,
 ) {
-    for UploadedFileEvent(file_data) in upload_events.iter() {
-        // https://docs.rs/pdbtbx/0.11.0/pdbtbx/fn.open_raw.html
-        let pdb = pdbtbx::open_raw(file_data, StrictnessLevel::Medium);
+    for LoadProteinEvent(file_data) in upload_events.read() {
+        let cursor = Cursor::new(file_data);
+        let buf_reader = BufReader::new(cursor);
+        let (pdb, error) = pdbtbx::open_raw(buf_reader, StrictnessLevel::Medium).unwrap();
+        // if let Some(error) = error {
+        //     println!("Warning: PDB parsing had errors: {:?}", error);
+        // }
+        let structure = Structure::builder().pdb(pdb).build();
         let pbr = structure.to_pbr(&mut meshes, &mut materials);
         commands.spawn((structure, pbr));
     }
@@ -29,114 +37,19 @@ fn handle_protein_upload(
 
 #[wasm_bindgen]
 pub fn run() {
-    let chalky = StandardMaterial {
-        base_color: Color::srgb(0.9, 0.9, 0.9), // Light gray color
-        perceptual_roughness: 1.0,              // Maximum roughness for a matte look
-        metallic: 0.0,                          // No metallic properties
-        reflectance: 0.1,                       // Low reflectance
-        specular_transmission: 0.0,             // No specular transmission
-        thickness: 0.0,                         // No thickness (for transparency)
-        ior: 1.5,                               // Index of refraction (standard for most materials)
-        alpha_mode: AlphaMode::Opaque,          // Fully opaque
-        cull_mode: None,                        // Don't cull any faces
-        ..default()                             // Use defaults for other properties
-    };
-
-    let _metallic = StandardMaterial {
-        base_color: Color::srgb(0.8, 0.8, 0.9), // Slight blue tint for a steel-like appearance
-        metallic: 1.0,                          // Fully metallic
-        perceptual_roughness: 0.1,              // Very smooth surface
-        reflectance: 0.5,                       // Medium reflectance
-        //emissive: Color::BLACK,                // No emission
-        alpha_mode: AlphaMode::Opaque, // Fully opaque
-        ior: 2.5,                      // Higher index of refraction for metals
-        specular_transmission: 0.0,    // No light transmission
-        thickness: 0.0,                // No thickness (for transparency)
-        //cull_mode: Some(Face::Back),   // Cull back faces for better performance
-        ..default() // Use defaults for other properties
-    };
-
-    let mut app = App::new();
-
-    app.add_plugins(DefaultPlugins)
-        .add_event::<UploadedFileEvent>()
-        .add_system(handle_protein_upload)
-        .add_plugins(StructurePlugin::new().with_file(
-            "examples/1fap.cif",
-            Some(StructureSettings {
-                render_type: RenderOptions::Solid,
-                color_scheme: ColorScheme::ByAtomType,
-                material: chalky,
-            }),
-        ))
-        .add_systems(Startup, setup);
-    // .add_systems(
-    //     Update,
-    //     (
-    //         update_protein_meshes,
-    //         focus_camera_on_proteins,
-    //     ),
-    // )
-    // .run();
-
-    // Make the app instance globally accessible
-    bevy::app::App::set_resource(bevy::app::AppInstance(app));
-
-    // Run the app
-    bevy::app::App::get_or_insert_resource::<bevy::app::AppInstance>().run();
+    App::new()
+        .add_plugins(DefaultPlugins)
+        .add_plugins(StructurePlugin::new())
+        .add_event::<LoadProteinEvent>()
+        .add_systems(Update, handle_protein_upload)
+        .add_systems(Startup, setup_scene)
+        .run();
 }
 
-#[derive(Component)]
-struct MainCamera;
-
-fn setup(mut commands: Commands) {
+fn setup_scene(mut commands: Commands) {
     // Add a camera
-    commands.spawn((
-        Camera3dBundle {
-            transform: Transform::from_xyz(0.0, 50.0, 100.0).looking_at(Vec3::ZERO, Vec3::Y),
-            ..default()
-        },
-        MainCamera,
-    ));
-
-    // Key Light
-    commands.spawn(DirectionalLightBundle {
-        directional_light: DirectionalLight {
-            color: Color::srgb(1.0, 0.9, 0.9),
-            illuminance: 10000.0,
-            shadows_enabled: true,
-            ..default()
-        },
-        transform: Transform::from_rotation(Quat::from_euler(EulerRot::XYZ, -0.5, 0.5, 0.0)),
-        ..default()
-    });
-
-    // Fill Light
-    commands.spawn(DirectionalLightBundle {
-        directional_light: DirectionalLight {
-            color: Color::srgb(0.8, 0.8, 1.0),
-            illuminance: 5000.0,
-            shadows_enabled: false,
-            ..default()
-        },
-        transform: Transform::from_rotation(Quat::from_euler(EulerRot::XYZ, 0.5, -0.5, 0.0)),
-        ..default()
-    });
-
-    // Back Light
-    commands.spawn(DirectionalLightBundle {
-        directional_light: DirectionalLight {
-            color: Color::srgb(0.9, 0.9, 1.0),
-            illuminance: 3000.0,
-            shadows_enabled: false,
-            ..default()
-        },
-        transform: Transform::from_rotation(Quat::from_euler(
-            EulerRot::XYZ,
-            0.0,
-            std::f32::consts::PI,
-            0.0,
-        )),
+    commands.spawn(Camera3dBundle {
+        transform: Transform::from_xyz(0.0, 0.0, 10.0).looking_at(Vec3::ZERO, Vec3::Y),
         ..default()
     });
 
@@ -150,73 +63,4 @@ fn setup(mut commands: Commands) {
         transform: Transform::from_xyz(4.0, 8.0, 4.0),
         ..default()
     });
-
-    // Spot light
-    commands.spawn(SpotLightBundle {
-        spot_light: SpotLight {
-            intensity: 10000.0,
-            color: Color::srgb(0.8, 1.0, 0.8),
-            shadows_enabled: true,
-            outer_angle: 0.6,
-            ..default()
-        },
-        transform: Transform::from_xyz(-4.0, 5.0, -4.0).looking_at(Vec3::ZERO, Vec3::Y),
-        ..default()
-    });
 }
-
-// fn update_protein_meshes(
-//     mut commands: Commands,
-//     mut meshes: ResMut<Assets<Mesh>>,
-//     mut materials: ResMut<Assets<StandardMaterial>>,
-//     query: Query<(Entity, &Structure), (With<Structure>, Without<Handle<Mesh>>)>,
-// ) {
-//     println!("I'm in the update_protein_mesh function!");
-//     println!("Total entities with Structure: {}", query.iter().count());
-//     for (entity, protein) in query.iter() {
-//         println!("Working on {:?}", entity);
-//         let mesh = protein.to_mesh();
-//         let mesh_handle = meshes.add(mesh);
-//         let material = materials.add(StandardMaterial {
-//             base_color: Color::srgb(0.8, 0.7, 0.6),
-//             metallic: 0.1,
-//             perceptual_roughness: 0.5,
-//             ..default()
-//         });
-
-//         commands.entity(entity).insert(PbrBundle {
-//             mesh: mesh_handle,
-//             material,
-//             ..default()
-//         });
-//     }
-// }
-
-// fn focus_camera_on_proteins(
-//     mut camera_query: Query<&mut Transform, (With<Camera>, Without<Structure>)>,
-//     protein_query: Query<&Transform, With<Structure>>,
-// ) {
-//     if let Ok(mut camera_transform) = camera_query.get_single_mut() {
-//         if let Some(center) = calculate_center_of_proteins(&protein_query) {
-//             let camera_position = center + Vec3::new(0.0, 50.0, 100.0);
-//             camera_transform.translation = camera_position;
-//             camera_transform.look_at(center, Vec3::Y);
-//         }
-//     }
-// }
-
-// fn calculate_center_of_proteins(
-//     protein_query: &Query<&Transform, With<Structure>>,
-// ) -> Option<Vec3> {
-//     let mut total = Vec3::ZERO;
-//     let mut count = 0;
-//     for transform in protein_query.iter() {
-//         total += transform.translation;
-//         count += 1;
-//     }
-//     if count > 0 {
-//         Some(total / count as f32)
-//     } else {
-//         None
-//     }
-// }
