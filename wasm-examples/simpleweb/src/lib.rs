@@ -12,8 +12,15 @@ pub struct LoadProteinEvent(pub Vec<u8>);
 #[wasm_bindgen]
 pub fn upload_protein_file(file_data: &[u8]) {
     // Get the Bevy app instance and send the event
-    let world = &mut World::default();
-    world.send_event(LoadProteinEvent(file_data.to_vec()));
+    app.send_event(LoadProteinEvent(file_data.to_vec()));
+}
+
+fn player_level_up(mut ev_levelup: EventWriter<LevelUpEvent>, query: Query<(Entity, &PlayerXp)>) {
+    for (entity, xp) in query.iter() {
+        if xp.0 > 1000 {
+            ev_levelup.send(LevelUpEvent(entity));
+        }
+    }
 }
 
 fn handle_protein_upload(
@@ -22,7 +29,10 @@ fn handle_protein_upload(
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut upload_events: EventReader<LoadProteinEvent>,
 ) {
-    for LoadProteinEvent(file_data) in upload_events.read() {
+    for event in upload_events.read() {
+        let LoadProteinEvent(file_data) = event;
+        println!("Received protein data, length: {}", file_data.len());
+
         let cursor = Cursor::new(file_data);
         let buf_reader = BufReader::new(cursor);
         let (pdb, error) = pdbtbx::open_raw(buf_reader, StrictnessLevel::Medium).unwrap();
@@ -37,8 +47,8 @@ fn handle_protein_upload(
 
 #[wasm_bindgen]
 pub fn run() {
-    App::new()
-        .add_plugins(DefaultPlugins)
+    let mut app = App::new();
+    app.add_plugins(DefaultPlugins)
         .add_plugins(StructurePlugin::new())
         .add_event::<LoadProteinEvent>()
         .add_systems(Update, handle_protein_upload)
@@ -64,3 +74,37 @@ fn setup_scene(mut commands: Commands) {
         ..default()
     });
 }
+
+#[cfg(target_arch = "wasm32")]
+/// WASM Part.
+#[derive(Resource)]
+pub struct ReceiverResource<T> {
+    pub rx: async_std::channel::Receiver<T>,
+}
+
+#[cfg(target_arch = "wasm32")]
+fn listen_js_escher(
+    receiver: Res<ReceiverResource<EscherMap>>,
+    mut escher_asset: ResMut<Assets<EscherMap>>,
+    mut escher_resource: ResMut<MapState>,
+) {
+    if let Ok(escher_map) = receiver.rx.try_recv() {
+        escher_resource.escher_map = escher_asset.add(escher_map);
+        escher_resource.loaded = false;
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+fn listen_js_data(
+    receiver: Res<ReceiverResource<Data>>,
+    mut data_asset: ResMut<Assets<Data>>,
+    mut data_resource: ResMut<ReactionState>,
+) {
+    if let Ok(escher_map) = receiver.rx.try_recv() {
+        data_resource.reaction_data = Some(data_asset.add(escher_map));
+        data_resource.loaded = false;
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+fn listen_js_info(receiver: Res<ReceiverResource<&'static str>>, mut info_box: ResMut<Info>) {}

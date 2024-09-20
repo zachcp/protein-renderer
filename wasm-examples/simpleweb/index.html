@@ -6,30 +6,36 @@
         <title>Bevy WebAssembly Test</title>
     </head>
     <body>
+        <input type="file" id="pdbInput" accept=".pdb,.cif" />
+        <canvas id="bevy-canvas"></canvas>
+
         <script type="module">
             import init, { run, upload_protein_file } from "./out/simpleweb.js";
             async function start() {
                 await init();
                 run();
-                document
-                    .getElementById("pdbInput")
-                    .addEventListener("change", handleFileUpload);
             }
+
             function handleFileUpload(event) {
                 const file = event.target.files[0];
                 if (file) {
+                    console.log("File selected:", file.name);
                     const reader = new FileReader();
                     reader.onload = function (e) {
                         const contents = new Uint8Array(e.target.result);
+                        console.log("File read, uploading to Rust...");
                         upload_protein_file(contents);
+                        console.log("Upload complete");
                     };
                     reader.readAsArrayBuffer(file);
                 }
             }
 
             start();
-        </script>
 
-        <input type="file" id="pdbInput" accept=".pdb,.cif" />
+            document
+                .getElementById("pdbInput")
+                .addEventListener("change", handleFileUpload);
+        </script>
     </body>
 </html>
