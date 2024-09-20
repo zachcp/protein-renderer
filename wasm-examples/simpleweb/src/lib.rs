@@ -1,12 +1,30 @@
 //!  Example allowing custom colors and rendering options
+use bevy::asset::AssetPlugin;
 use bevy::prelude::*;
+use pdbtbx::{self, StrictnessLevel};
 use protein_renderer::{ColorScheme, RenderOptions, StructurePlugin, StructureSettings};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
-pub fn load_cif_data(data: &[u8]) {
-    // Process the CIF data
-    // You might need to use a channel or event system to communicate with your Bevy app
+pub fn upload_protein_file(file_data: &[u8]) {
+    // Get the Bevy app instance
+    let app = bevy::app::App::get_or_insert_resource::<bevy::app::AppInstance>();
+    // Send the UploadedFileEvent
+    app.world.send_event(UploadedFileEvent(file_data.to_vec()));
+}
+
+fn handle_protein_upload(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut upload_events: EventReader<UploadedFileEvent>,
+) {
+    for UploadedFileEvent(file_data) in upload_events.iter() {
+        // https://docs.rs/pdbtbx/0.11.0/pdbtbx/fn.open_raw.html
+        let pdb = pdbtbx::open_raw(file_data, StrictnessLevel::Medium);
+        let pbr = structure.to_pbr(&mut meshes, &mut materials);
+        commands.spawn((structure, pbr));
+    }
 }
 
 #[wasm_bindgen]
@@ -38,8 +56,11 @@ pub fn run() {
         ..default() // Use defaults for other properties
     };
 
-    App::new()
-        .add_plugins(DefaultPlugins)
+    let mut app = App::new();
+
+    app.add_plugins(DefaultPlugins)
+        .add_event::<UploadedFileEvent>()
+        .add_system(handle_protein_upload)
         .add_plugins(StructurePlugin::new().with_file(
             "examples/1fap.cif",
             Some(StructureSettings {
@@ -48,15 +69,21 @@ pub fn run() {
                 material: chalky,
             }),
         ))
-        .add_systems(Startup, setup)
-        // .add_systems(
-        //     Update,
-        //     (
-        //         update_protein_meshes,
-        //         focus_camera_on_proteins,
-        //     ),
-        // )
-        .run();
+        .add_systems(Startup, setup);
+    // .add_systems(
+    //     Update,
+    //     (
+    //         update_protein_meshes,
+    //         focus_camera_on_proteins,
+    //     ),
+    // )
+    // .run();
+
+    // Make the app instance globally accessible
+    bevy::app::App::set_resource(bevy::app::AppInstance(app));
+
+    // Run the app
+    bevy::app::App::get_or_insert_resource::<bevy::app::AppInstance>().run();
 }
 
 #[derive(Component)]
