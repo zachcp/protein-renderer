@@ -15,7 +15,6 @@ python3 -m http.server
 # wasm-opt -Os pkg/bevy_wasm_test_bg.wasm -o add.wasm
 # mv add.wasm pkg/bevy_wasm_test_bg.wasm
 # python3 -m http.server
-
 ```
 
 
