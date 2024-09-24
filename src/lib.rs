@@ -1,3 +1,4 @@
+pub mod bonds;
 pub mod colors;
 pub mod plugin;
 pub mod structure;

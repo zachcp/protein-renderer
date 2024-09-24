@@ -1,3 +1,8 @@
+//! Bonds
+//!
+//! Currently pdbtbx doesn't support Bonds
+//!  see: https://github.com/douweschulte/pdbtbx/issues/80
+//!
 use nalgebra::Point3;
 use pdbtbx::{Atom, Element, PDB};
 use std::collections::HashMap;
@@ -87,24 +92,34 @@ fn is_metal(element: &Element) -> bool {
     )
 }
 
-// Example usage
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let pdb = pdbtbx::open("path/to/your/pdb/file.pdb")?;
-    let bonds = detect_bonds(&pdb);
-    println!("Detected {} bonds", bonds.len());
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use pdbtbx::StrictnessLevel;
 
-    // Print some bond details
-    for (index, bond) in bonds.iter().enumerate().take(5) {
-        let atom1 = pdb.atoms().nth(bond.atom1_index).unwrap();
-        let atom2 = pdb.atoms().nth(bond.atom2_index).unwrap();
-        println!(
-            "Bond {}: {} - {} (Distance: {:.2}Å)",
-            index,
-            atom1.name(),
-            atom2.name(),
-            atom1.distance(atom2)
-        );
+    #[test]
+    fn test_bond_detection() -> Result<(), Box<dyn std::error::Error>> {
+        let (pdb, _errors) = pdbtbx::open("examples/9ddy.pdb", StrictnessLevel::Loose)?;
+
+        let bonds = detect_bonds(&pdb);
+        assert!(!bonds.is_empty(), "No bonds detected");
+
+        // Check some bond details
+        for bond in bonds.iter().take(5) {
+            let atom1 = pdb.atoms().nth(bond.atom1_index).unwrap();
+            let atom2 = pdb.atoms().nth(bond.atom2_index).unwrap();
+            let distance = atom1.distance(atom2);
+            assert!(
+                distance > 0.0 && distance < 3.5,
+                "Bond distance out of expected range"
+            );
+            assert_ne!(
+                atom1.name(),
+                atom2.name(),
+                "Bond between identical atoms detected"
+            );
+        }
+
+        Ok(())
     }
-
-    Ok(())
 }
