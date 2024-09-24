@@ -1,6 +1,10 @@
 //! Module for loading PDBs into Bevy via the Plugin system
 //!
 //! Over time this would be a good candidate for factoring out
+//!
+//! Note: CIF loads fine but does not have Bonds
+//! Note: Many PDBs don't load at all unless Strictness::Loose is used.
+//!
 use super::{ColorScheme, RenderOptions, Structure};
 use bevy::prelude::*;
 use pdbtbx::StrictnessLevel;
@@ -75,7 +79,7 @@ fn load_initial_proteins(
 
         if let Ok((pdb, _errors)) = pdbtbx::open(
             file_path.to_str().unwrap_or_default(),
-            StrictnessLevel::Medium,
+            StrictnessLevel::Loose,
         ) {
             let structure = Structure::builder()
                 .pdb(pdb)
@@ -83,6 +87,7 @@ fn load_initial_proteins(
                 .color_scheme(settings.color_scheme.clone())
                 .material(settings.material.clone())
                 .build();
+
             // bundle the mesh and the material together.
             let pbr = structure.to_pbr(&mut meshes, &mut materials);
             commands.spawn((structure, pbr));
