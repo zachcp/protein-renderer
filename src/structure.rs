@@ -110,7 +110,6 @@ impl Structure {
     fn render_ballandstick(&self) -> Mesh {
         let mut meshes = Vec::new();
 
-        println!("Number of bonds: {}", self.pdb.bonds().count());
         let bonds: Vec<_> = self.pdb.bonds().collect();
         info!("Number of bonds: {}", bonds.len());
         println!("Structure summary:");
@@ -118,6 +117,7 @@ impl Structure {
         println!("  Number of chains: {}", self.pdb.chains().count());
         println!("  Number of residues: {}", self.pdb.residues().count());
         println!("  Number of atoms: {}", self.pdb.atoms().count());
+        println!("Number of bonds: {}", self.pdb.bonds().count());
 
         // Render spheres (atoms)
         for atom in self.pdb.atoms() {

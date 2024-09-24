@@ -33,7 +33,7 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugins(StructurePlugin::new().with_file(
-            "examples/9f2r.pdb",
+            "examples/9ddy.pdb",
             Some(StructureSettings {
                 render_type: RenderOptions::BallAndStick,
                 color_scheme: ColorScheme::ByAtomType,
