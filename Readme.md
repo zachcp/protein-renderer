@@ -1,3 +1,5 @@
+**arvhived. see [ferritin](https://zachcp.github.io/ferritin/) for updated code**
+
 # protein-renderer
 
 
